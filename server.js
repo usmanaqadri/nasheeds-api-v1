@@ -4,11 +4,15 @@ const cors = require("cors");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 3001;
+const FRONTEND_ORIGIN =
+  process.env.FRONTEND_ORIGIN || "http://localhost:3000/nasheeds-all-night";
 
 //middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(
+  cors({ origin: FRONTEND_ORIGIN, methods: ["GET", "POST", "PUT", "DELETE"] })
+);
 
 // DEFAULT
 app.get("/", (req, res) => {
