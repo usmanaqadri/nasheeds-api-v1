@@ -4,10 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 3001;
-const FRONTEND_ORIGIN =
-  process.env.NODE_ENV === "dev"
-    ? "http://localhost:3000"
-    : process.env.FRONTEND_ORIGIN;
+
 //req db connection
 require("./config/db.connections");
 
@@ -15,12 +12,9 @@ require("./config/db.connections");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-// app.use(
-//   cors({ origin: FRONTEND_ORIGIN, methods: ["GET", "POST", "PUT", "DELETE"] })
-// );
 
 // DEFAULT
-app.get("/", (req, res) => {
+app.get("/api/v1/", (req, res) => {
   const today = new Date();
   res.send(`
     <h1>Hello! This is the Nasheeds All Night backend API</h1>
@@ -30,7 +24,7 @@ app.get("/", (req, res) => {
 });
 
 const routes = require("./routes");
-app.use("/nasheed", routes.nasheed);
+app.use("/api/v1/nasheed", routes.nasheed);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
