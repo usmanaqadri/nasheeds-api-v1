@@ -2,9 +2,6 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
-const fs = require("fs");
-
-const file = fs.readFileSync("./FF6E48860567030E2DCF7295B5A99399.txt");
 
 const PORT = process.env.PORT || 3001;
 const FRONTEND_ORIGIN =
@@ -17,9 +14,10 @@ require("./config/db.connections");
 //middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({ origin: FRONTEND_ORIGIN, methods: ["GET", "POST", "PUT", "DELETE"] })
-);
+app.use(cors());
+// app.use(
+//   cors({ origin: FRONTEND_ORIGIN, methods: ["GET", "POST", "PUT", "DELETE"] })
+// );
 
 // DEFAULT
 app.get("/", (req, res) => {
@@ -30,15 +28,6 @@ app.get("/", (req, res) => {
     <p>${today}</p>
   `);
 });
-
-app.get(
-  "/.well-known/pki-validation/FF6E48860567030E2DCF7295B5A99399.txt",
-  (req, res) => {
-    res.sendFile(
-      "/home/ubuntu/nasheeds-api-v1/FF6E48860567030E2DCF7295B5A99399.txt"
-    );
-  }
-);
 
 const routes = require("./routes");
 app.use("/nasheed", routes.nasheed);
