@@ -22,7 +22,7 @@ jobs:
           source: "."
           target: "/home/ubuntu/nasheed-app/nasheeds-api-v1"
           rm: true 
-          exclude: "node_modules, .git, .env,
+          exclude: "node_modules, .git, .env"
 
       - name: SSH into EC2 and restart PM2 process
         uses: appleboy/ssh-action@v1.0.0
