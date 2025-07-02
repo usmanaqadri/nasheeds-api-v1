@@ -19,8 +19,10 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "config/*, server.js, package.json, routes/*, controllers/*, models/*"
+          source: "."
           target: "/home/ubuntu/nasheed-app/nasheeds-api-v1"
+          rm: true 
+          exclude: "node_modules, .git, .env,
 
       - name: SSH into EC2 and restart PM2 process
         uses: appleboy/ssh-action@v1.0.0
