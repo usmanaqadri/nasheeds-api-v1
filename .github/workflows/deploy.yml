@@ -31,5 +31,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/nasheed-app/nasheeds-api-v1
+            npm i
             pm2 restart nasheeds-api
             exit
