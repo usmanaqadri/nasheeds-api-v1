@@ -29,7 +29,9 @@ const seed = (req, res) => {
 
 const create = (req, res) => {
   db.Nasheed.create(req.body, (err, createdNasheed) => {
-    if (err) return res.status(404).json({ error: err.message });
+    if (err)
+      return res.status(404).json({ message: err.message, code: err.code });
+
     return res.status(200).json(createdNasheed);
   });
 };
