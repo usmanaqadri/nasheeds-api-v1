@@ -3,7 +3,7 @@ const reverseWords = (text) => {
 };
 
 const isUrdu = (text) => {
-  const urduChars = ["ے", "ٹ", "ں", "ڈ", "ڑ", "ؤ", "ۂ", "ۓ"];
+  const urduChars = ["ے", "ٹ", "ں", "ڈ", "ڑ", "ؤ", "ۂ", "ۓ", "ٰ"];
   return urduChars.some((char) => text.includes(char));
 };
 
