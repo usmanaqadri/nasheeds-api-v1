@@ -35,11 +35,10 @@ const generatePDF = (req, res) => {
     transliterationArray,
   } = req.body;
 
-  const isUrdu = detectLanguage(arabicArray, 5) === "urdu";
-
+  const isUrdu = detectLanguage(arabicArray) === "urdu";
   const content = [
     {
-      text: reverseWords(arabicTitle),
+      text: reverseWords(arabicTitle, isUrdu ? 40 : 3),
       fontSize: 24,
       bold: true,
       alignment: "center",
@@ -52,16 +51,16 @@ const generatePDF = (req, res) => {
       fontSize: 16,
       italics: true,
       alignment: "center",
-      margin: [0, 0, 0, 30], // Space below the title section
+      margin: [0, 0, 0, 30],
       font: "NotoSans",
     },
   ];
 
   for (let i = 0; i < arabicArray.length; i++) {
-    const processedArabic = reverseWords(arabicArray[i]);
+    const processedArabic = reverseWords(arabicArray[i], isUrdu ? 40 : 3);
 
     content.push({
-      unbreakable: true, // 🔥 This is the key
+      unbreakable: true,
       stack: [
         {
           text: processedArabic,
@@ -72,18 +71,18 @@ const generatePDF = (req, res) => {
           margin: [0, 10],
         },
         {
-          text: englishArray[i],
-          fontSize: 12,
-          alignment: "center",
-          margin: [0, 5],
-          font: "NotoSans",
-        },
-        {
           text: parseTransliteration(transliterationArray[i]),
           fontSize: 12,
           alignment: "center",
           italics: true,
           margin: [0, 5, 0, 20],
+          font: "NotoSans",
+        },
+        {
+          text: englishArray[i],
+          fontSize: 12,
+          alignment: "center",
+          margin: [0, 5],
           font: "NotoSans",
         },
       ],
