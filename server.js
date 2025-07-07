@@ -25,6 +25,7 @@ app.get("/api/v1/", (req, res) => {
 
 const routes = require("./routes");
 app.use("/api/v1/nasheed", routes.nasheed);
+app.use("/api/v1/user", routes.user);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
