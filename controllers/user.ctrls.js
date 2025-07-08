@@ -1,5 +1,5 @@
 const db = require("../models");
-const { verifyGoogleToken } = require("../utils/customMiddleware");
+const { generateToken, verifyGoogleToken } = require("../utils/helperFuncs");
 
 const index = (req, res) => {
   db.User.find({}, (error, users) => {
@@ -13,15 +13,16 @@ const index = (req, res) => {
 };
 
 const auth = async (req, res) => {
-  const { token } = req.body;
+  const { token: googleToken } = req.body;
   try {
-    const googleUser = await verifyGoogleToken(token);
+    const googleUser = await verifyGoogleToken(googleToken);
 
     // Example user object
     const user = {
       googleId: googleUser.sub,
       email: googleUser.email,
       name: googleUser.name,
+      admin: false,
     };
 
     // Check if user exists in MongoDB
@@ -30,9 +31,12 @@ const auth = async (req, res) => {
       existingUser = await db.User.create(user);
     }
 
-    return res
-      .status(200)
-      .json({ message: "User authenticated", user: existingUser });
+    console.log("do we make it here?");
+    console.log("do i have an existing user", existingUser);
+    const token = generateToken(existingUser);
+    console.log("do I get a token", token);
+
+    return res.status(200).json({ token });
   } catch (err) {
     return res
       .status(401)

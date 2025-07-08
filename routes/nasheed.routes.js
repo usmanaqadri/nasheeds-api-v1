@@ -4,11 +4,11 @@ const router = express.Router();
 
 const ctrls = require("../controllers");
 const { generatePDF } = require("../services/pdfGenerator");
-const { isAuthenticated } = require("../utils/customMiddleware");
+const { protect } = require("../utils/middleware");
 
 router.get("/", ctrls.nasheed.index);
 router.get("/seed", ctrls.nasheed.seed);
-router.post("/", isAuthenticated, ctrls.nasheed.create);
+router.post("/", protect, ctrls.nasheed.create);
 router.post("/echoMessage", ctrls.nasheed.echo);
 router.get("/:id", ctrls.nasheed.show);
 router.put("/:id", ctrls.nasheed.update);
