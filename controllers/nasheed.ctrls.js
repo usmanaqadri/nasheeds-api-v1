@@ -28,10 +28,10 @@ const seed = (req, res) => {
 };
 
 const create = (req, res) => {
-  db.Nasheed.create(req.body, (err, createdNasheed) => {
+  const nasheedToCreate = req.body;
+  db.Nasheed.create(nasheedToCreate, (err, createdNasheed) => {
     if (err)
       return res.status(404).json({ message: err.message, code: err.code });
-
     return res.status(200).json(createdNasheed);
   });
 };
@@ -42,7 +42,8 @@ const update = (req, res) => {
     { $set: req.body },
     { new: true },
     (err, updatedNasheed) => {
-      if (err) return res.status(400).json({ error: err });
+      if (err)
+        return res.status(400).json({ message: err.message, code: err.code });
       return res.status(200).json(updatedNasheed);
     }
   );

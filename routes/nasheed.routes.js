@@ -11,7 +11,7 @@ router.get("/seed", ctrls.nasheed.seed);
 router.post("/", protect, ctrls.nasheed.create);
 router.post("/echoMessage", ctrls.nasheed.echo);
 router.get("/:id", ctrls.nasheed.show);
-router.put("/:id", ctrls.nasheed.update);
+router.put("/:id", protect, ctrls.nasheed.update);
 router.delete("/:id", ctrls.nasheed.destroy);
 
 router.post("/generate-pdf", generatePDF);

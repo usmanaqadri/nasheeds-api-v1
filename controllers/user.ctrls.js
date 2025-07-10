@@ -13,9 +13,9 @@ const index = (req, res) => {
 };
 
 const auth = async (req, res) => {
-  const { token: googleToken } = req.body;
+  const { code } = req.body;
   try {
-    const googleUser = await verifyGoogleToken(googleToken);
+    const googleUser = await verifyGoogleToken(code);
 
     // Example user object
     const user = {
@@ -26,16 +26,18 @@ const auth = async (req, res) => {
     };
 
     // Check if user exists in MongoDB
-    let existingUser = await db.User.findOne({ googleId: user.googleId });
-    if (!existingUser) {
-      existingUser = await db.User.create(user);
+    let dbUser = await db.User.findOne({ googleId: user.googleId });
+    if (!dbUser) {
+      dbUser = await db.User.create(user);
     }
 
-    console.log("do we make it here?");
-    console.log("do i have an existing user", existingUser);
-    const token = generateToken(existingUser);
-    console.log("do I get a token", token);
+    const userObj = {
+      ...dbUser.toObject(),
+      picture: googleUser.picture,
+      firstName: googleUser.given_name,
+    };
 
+    const token = generateToken(userObj);
     return res.status(200).json({ token });
   } catch (err) {
     return res
