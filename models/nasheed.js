@@ -7,6 +7,8 @@ const nasheedSchema = new mongoose.Schema({
   arab: [{ type: String, required: true }],
   rom: [{ type: String }],
   eng: [{ type: String, required: true }],
+  isPublic: { type: Boolean, required: true },
+  creatorId: { type: String, required: true },
 });
 
 // CREATE MODEL
