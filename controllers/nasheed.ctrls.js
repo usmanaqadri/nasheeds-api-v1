@@ -1,14 +1,20 @@
 const db = require("../models");
 
 const index = (req, res) => {
-  db.Nasheed.find({}, (error, nasheeds) => {
-    if (error) return res.status(400).json({ error: error.message });
+  const { id } = req.body;
+  db.Nasheed.find(
+    {
+      $or: [{ isPublic: true }, { creatorId: id }],
+    },
+    (error, nasheeds) => {
+      if (error) return res.status(400).json({ error: error.message });
 
-    return res.status(200).json({
-      nasheeds,
-      requestedAt: new Date().toLocaleString(),
-    });
-  });
+      return res.status(200).json({
+        nasheeds,
+        requestedAt: new Date().toLocaleString(),
+      });
+    }
+  );
 };
 
 const seed = (req, res) => {
@@ -16,9 +22,11 @@ const seed = (req, res) => {
     {
       arabTitle: "يا إمام الرسل",
       engTitle: "Ya Imam al-Rusli",
-      arab: "أنت باب الله معتمدي",
-      rom: "Anta baabu l-Lahi mu'tamadi",
-      eng: "You are the door to God, my guarantee",
+      arab: ["أنت باب الله معتمدي"],
+      rom: ["Anta baabu l-Lahi mu'tamadi"],
+      eng: ["You are the door to God, my guarantee"],
+      isPublic: false,
+      creatorId: "rando",
     },
     (err, data) => {
       console.log("this is the err", err);
