@@ -1,117 +1,140 @@
-const PdfPrinter = require("pdfmake");
-const { reverseWords, detectLanguage } = require("../utils/languageDetection");
-const { parseTransliteration } = require("../utils/htmlParser");
+const puppeteer = require("puppeteer");
 
-// Load fonts
-const fonts = {
-  NotoSans: {
-    normal: "./fonts/NotoSans-Regular.ttf",
-    bold: "./fonts/NotoSans-Bold.ttf",
-    italics: "./fonts/NotoSans-Italic.ttf",
-    bolditalics: "./fonts/NotoSans-BoldItalic.ttf",
-  },
-  NotoNaskhArabic: {
-    normal: "./fonts/NotoNaskhArabic-Regular.ttf",
-    bold: "./fonts/NotoNaskhArabic-Bold.ttf",
-    italics: "./fonts/NotoNaskhArabic-Regular.ttf", // fallback
-    bolditalics: "./fonts/NotoNaskhArabic-Bold.ttf", // fallback
-  },
-  JameelNooriNastaleeq: {
-    normal: "./fonts/JameelNooriNastaleeqRegular.ttf",
-    bold: "./fonts/JameelNooriNastaleeqRegular.ttf",
-    italics: "./fonts/JameelNooriNastaleeqRegular.ttf",
-    bolditalics: "./fonts/JameelNooriNastaleeqRegular.ttf",
-  },
-};
+function sanitizeFilename(name) {
+  if (!name) return "nasheed";
+  return name.replace(/[^a-zA-Z0-9-_\.]/g, "_");
+}
+function generateHTML({
+  arabicTitle,
+  engTitle,
+  arabicArray,
+  transliterationArray,
+  englishArray,
+}) {
+  const bodyBlocks = arabicArray
+    .map((arabic, idx) => {
+      return `
+        <div class="verse-block">
+          <p class="arabic">${arabic}</p>
+          <p class="transliteration"><em>${transliterationArray[idx]}</em></p>
+          <p class="english">${englishArray[idx]}</p>
+        </div>
+      `;
+    })
+    .join("\n");
 
-const printer = new PdfPrinter(fonts);
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>${engTitle}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300&family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+      <style>
+        @page {
+          margin: 40px;
+        }
 
-const generatePDF = (req, res) => {
-  const {
-    arabicTitle,
-    engTitle,
-    arabicArray,
-    englishArray,
-    transliterationArray,
-  } = req.body;
+        body {
+          font-family: 'Cormorant', serif;
+          background-color: #fdfbf9;
+          color: #222;
+          margin: 0;
+          padding: 0;
+        }
 
-  const isUrdu = detectLanguage(arabicArray) === "urdu";
-  const content = [
-    {
-      text: reverseWords(arabicTitle, isUrdu ? 40 : 3),
-      fontSize: 24,
-      bold: true,
-      alignment: "center",
-      margin: [0, 20, 0, 10],
-      rtl: true,
-      font: isUrdu ? "JameelNooriNastaleeq" : "NotoNaskhArabic",
-    },
-    {
-      text: engTitle,
-      fontSize: 16,
-      italics: true,
-      alignment: "center",
-      margin: [0, 0, 0, 30],
-      font: "NotoSans",
-    },
-  ];
+        .container {
+          padding: 40px;
+        }
 
-  for (let i = 0; i < arabicArray.length; i++) {
-    const processedArabic = reverseWords(arabicArray[i], isUrdu ? 40 : 3);
+        h1, h2 {
+          text-align: center;
+        }
 
-    content.push({
-      unbreakable: true,
-      stack: [
-        {
-          text: processedArabic,
-          fontSize: isUrdu ? 20 : 16,
-          alignment: "center",
-          font: isUrdu ? "JameelNooriNastaleeq" : "NotoNaskhArabic",
-          rtl: true,
-          margin: [0, 10],
-        },
-        {
-          text: parseTransliteration(transliterationArray[i]),
-          fontSize: 12,
-          alignment: "center",
-          italics: true,
-          margin: [0, 5],
-          font: "NotoSans",
-        },
-        {
-          text: englishArray[i],
-          fontSize: 12,
-          alignment: "center",
-          margin: [0, 5, 0, 20],
-          font: "NotoSans",
-        },
-      ],
+        .verse-block {
+          margin: 20px 0;
+          text-align: center;
+          break-inside: avoid;
+        }
+
+        .arabic-title {
+          font-family: 'Noto Nastaliq Urdu', serif;
+          direction: rtl;
+          word-spacing: 0.2em;
+        }
+
+        .arabic {
+          font-size: 24px;
+          font-family: 'Noto Nastaliq Urdu', serif;
+          direction: rtl;
+          line-height: 2;
+          word-spacing: 0.2em;
+        }
+
+        .transliteration {
+          font-size: 16px;
+          font-style: italic;
+        }
+
+        .english {
+          font-size: 16px;
+        }
+      </style>
+    </head>
+    <body>
+      <h1 class="arabic-title">${arabicTitle}</h1>
+      <h2><em>${engTitle}</em></h2>
+      ${bodyBlocks}
+    </body>
+    </html>
+  `;
+}
+
+const generatePDF = async (req, res) => {
+  try {
+    const {
+      arabicTitle,
+      engTitle,
+      arabicArray,
+      englishArray,
+      transliterationArray,
+    } = req.body;
+
+    const htmlContent = generateHTML({
+      arabicTitle,
+      engTitle,
+      arabicArray,
+      englishArray,
+      transliterationArray,
     });
-  }
 
-  const docDefinition = {
-    content: content,
-    defaultStyle: {
-      font: "NotoSans",
-    },
-  };
+    const browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
 
-  const pdfDoc = printer.createPdfKitDocument(docDefinition);
+    const page = await browser.newPage();
+    await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
-  let chunks = [];
-  pdfDoc.on("data", (chunk) => {
-    chunks.push(chunk);
-  });
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
 
-  pdfDoc.on("end", () => {
-    const result = Buffer.concat(chunks);
+    await browser.close();
+
+    const safeFileName = sanitizeFilename(engTitle);
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=lyrics.pdf");
-    res.send(result);
-  });
-
-  pdfDoc.end();
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${safeFileName}.pdf"`
+    );
+    res.end(pdfBuffer);
+  } catch (err) {
+    console.error("PDF generation failed:", err);
+    res.status(500).send("Failed to generate PDF");
+  }
 };
 
 module.exports = { generatePDF };
