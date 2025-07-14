@@ -20,7 +20,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^6.8.2",
     "node-html-parser": "^7.0.1",
-    "pdfmake": "^0.2.20",
-    "unicode-bidirectional": "^2.0.5"
+    "puppeteer": "^24.12.1"
   }
 }
