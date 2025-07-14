@@ -133,7 +133,7 @@ const generatePDF = async (req, res) => {
     res.end(pdfBuffer);
   } catch (err) {
     console.error("PDF generation failed:", err);
-    res.status(500).send("Failed to generate PDF");
+    res.status(500).json({ message: err.message });
   }
 };
 
