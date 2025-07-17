@@ -6,7 +6,7 @@ const ctrls = require("../controllers");
 const { generatePDF } = require("../services/pdfGenerator");
 const { protect } = require("../utils/middleware");
 
-router.post("/", ctrls.nasheed.index);
+router.get("/", ctrls.nasheed.index);
 router.get("/seed", ctrls.nasheed.seed);
 router.post("/create", protect, ctrls.nasheed.create);
 router.post("/echoMessage", ctrls.nasheed.echo);

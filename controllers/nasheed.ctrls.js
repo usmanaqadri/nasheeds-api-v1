@@ -1,10 +1,10 @@
 const db = require("../models");
 
 const index = (req, res) => {
-  const { id } = req.body;
+  const userId = req.query.userId;
   db.Nasheed.find(
     {
-      $or: [{ isPublic: true }, { creatorId: id }],
+      $or: [{ isPublic: true }, { creatorId: userId }],
     },
     (error, nasheeds) => {
       if (error) return res.status(400).json({ error: error.message });
