@@ -10,18 +10,71 @@ function generateHTML({
   arabicArray,
   transliterationArray,
   englishArray,
+  footnotes,
 }) {
+  let footnoteCounter = 1;
+  const footnoteRefs = [];
+
   const bodyBlocks = arabicArray
     .map((arabic, idx) => {
+      const verseFootnotes = footnotes
+        .filter((fn) => fn.verseIndex === idx)
+        .sort((a, b) => b.range[0] - a.range[0]); // Sort descending to avoid index shift
+
+      let englishWithFootnotes = englishArray[idx];
+
+      verseFootnotes.forEach((fn, i) => {
+        const noteNumber = footnoteCounter++;
+        const [start, end] = fn.range;
+
+        if (
+          typeof start !== "number" ||
+          typeof end !== "number" ||
+          start < 0 ||
+          end >= englishWithFootnotes.length
+        )
+          return;
+
+        const before = englishWithFootnotes.slice(0, start);
+        const highlighted = englishWithFootnotes.slice(start, end + 1);
+        const after = englishWithFootnotes.slice(end + 1);
+
+        englishWithFootnotes = `${before}<span>${highlighted}<sup><a href="#footnote-${noteNumber}">${noteNumber}</a></sup></span>${after}`;
+
+        footnoteRefs.push({
+          verseIndex: fn.verseIndex,
+          number: noteNumber,
+          content: fn.content,
+        });
+      });
+
       return `
-        <div class="verse-block">
-          <p class="arabic">${arabic}</p>
-          <p class="transliteration"><em>${transliterationArray[idx]}</em></p>
-          <p class="english">${englishArray[idx]}</p>
-        </div>
-      `;
+      <div class="verse-block" id="verse-${idx}">
+        <p class="arabic">${arabic}</p>
+        <p class="transliteration"><em>${transliterationArray[idx]}</em></p>
+        <p class="english">${englishWithFootnotes}</p>
+      </div>
+    `;
     })
     .join("\n");
+
+  const footnoteSection =
+    footnoteRefs.length > 0
+      ? `
+        <hr />
+        <div class="footnotes">
+          ${footnoteRefs
+            .map(
+              (fn) => `
+            <div class="footnote" id="footnote-${fn.number}">
+              <sup><a href="#verse-${fn.verseIndex}">${fn.number}</a></sup> ${fn.content}
+            </div>
+          `
+            )
+            .join("\n")}
+        </div>
+`
+      : "";
 
   return `
     <!DOCTYPE html>
@@ -37,7 +90,6 @@ function generateHTML({
 
         body {
           font-family: 'Cormorant', serif;
-          background-color: #fdfbf9;
           color: #222;
           margin: 0;
           padding: 0;
@@ -49,6 +101,12 @@ function generateHTML({
 
         h1, h2 {
           text-align: center;
+        }
+
+        a {
+          text-decoration: none;
+          color: #6faeec;
+          font-weight: bold;
         }
 
         .verse-block {
@@ -69,6 +127,7 @@ function generateHTML({
           direction: rtl;
           line-height: 2;
           word-spacing: 0.2em;
+          padding-top: 10px;
         }
 
         .transliteration {
@@ -84,7 +143,8 @@ function generateHTML({
     <body>
       <h1 class="arabic-title">${arabicTitle}</h1>
       <h2><em>${engTitle}</em></h2>
-      ${bodyBlocks}
+      ${bodyBlocks}      
+      ${footnoteSection}
     </body>
     </html>
   `;
@@ -98,6 +158,7 @@ const generatePDF = async (req, res) => {
       arabicArray,
       englishArray,
       transliterationArray,
+      footnotes,
     } = req.body;
 
     const htmlContent = generateHTML({
@@ -106,6 +167,7 @@ const generatePDF = async (req, res) => {
       arabicArray,
       englishArray,
       transliterationArray,
+      footnotes,
     });
 
     const browser = await puppeteer.launch({
