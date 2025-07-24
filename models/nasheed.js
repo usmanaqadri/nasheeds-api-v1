@@ -7,6 +7,13 @@ const nasheedSchema = new mongoose.Schema({
   arab: [{ type: String, required: true }],
   rom: [{ type: String }],
   eng: [{ type: String, required: true }],
+  footnotes: [
+    {
+      verseIndex: { type: Number, required: true },
+      range: { type: [Number], required: true },
+      content: { type: String, required: true },
+    },
+  ],
   isPublic: { type: Boolean, required: true },
   creatorId: { type: String, required: true },
 });
