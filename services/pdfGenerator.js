@@ -19,11 +19,12 @@ function generateHTML({
     .map((arabic, idx) => {
       const verseFootnotes = footnotes
         .filter((fn) => fn.verseIndex === idx)
-        .sort((a, b) => b.range[0] - a.range[0]); // Sort descending to avoid index shift
+        .sort((a, b) => a.range[0] - b.range[0]); // Ascending start offsets
 
       let englishWithFootnotes = englishArray[idx];
+      let offsetDelta = 0;
 
-      verseFootnotes.forEach((fn, i) => {
+      verseFootnotes.forEach((fn) => {
         const noteNumber = footnoteCounter++;
         const [start, end] = fn.range;
 
@@ -35,11 +36,21 @@ function generateHTML({
         )
           return;
 
-        const before = englishWithFootnotes.slice(0, start);
-        const highlighted = englishWithFootnotes.slice(start, end + 1);
-        const after = englishWithFootnotes.slice(end + 1);
+        const adjustedStart = start + offsetDelta;
+        const adjustedEnd = end + offsetDelta;
 
-        englishWithFootnotes = `${before}<span>${highlighted}<sup><a href="#footnote-${noteNumber}">${noteNumber}</a></sup></span>${after}`;
+        const before = englishWithFootnotes.slice(0, adjustedStart);
+        const highlighted = englishWithFootnotes.slice(
+          adjustedStart,
+          adjustedEnd
+        );
+        const after = englishWithFootnotes.slice(adjustedEnd);
+
+        const footnoteMarkup = `<span>${highlighted}</span><sup><a href="#footnote-${noteNumber}">${noteNumber}</a></sup>`;
+
+        englishWithFootnotes = `${before}${footnoteMarkup}${after}`;
+
+        offsetDelta += footnoteMarkup.length - (adjustedEnd - adjustedStart); // Account for insertion length
 
         footnoteRefs.push({
           verseIndex: fn.verseIndex,
