@@ -21,33 +21,65 @@ const index = (req, res) => {
   });
 };
 
-const create = (req, res) => {
-  const liveSessionToCreate = req.body;
+const create = async (req, res) => {
+  try {
+    const slideshow = await db.Slideshow.findById(req.body.slideshowId);
 
-  db.LiveSession.create(liveSessionToCreate, (err, createdLiveSession) => {
-    if (err)
-      return res.status(404).json({ message: err.message, code: err.code });
+    if (!slideshow) {
+      return res.status(404).json({ message: "slideshow not found" });
+    }
+
+    if (slideshow.creatorId !== req.user.id) {
+      return res.status(403).json({
+        message: "You can only start a live session for your own slideshow",
+      });
+    }
+
+    const createdLiveSession = await db.LiveSession.create({
+      slideshowId: req.body.slideshowId,
+      leaderUserId: req.user.id,
+      currentSlideIndex: 0,
+      isActive: true,
+    });
 
     return res.status(200).json(createdLiveSession);
-  });
+  } catch (err) {
+    return res.status(404).json({ message: err.message, code: err.code });
+  }
 };
 
-const update = (req, res) => {
-  db.LiveSession.findByIdAndUpdate(
-    req.params.id,
-    { $set: req.body },
-    { new: true, runValidators: true },
-    (err, updatedLiveSession) => {
-      if (err)
-        return res.status(400).json({ message: err.message, code: err.code });
-      if (!updatedLiveSession)
-        return res.status(404).json({ error: "live session not found" });
+const update = async (req, res) => {
+  try {
+    const existingLiveSession = await db.LiveSession.findById(req.params.id);
 
-      emitSessionUpdate(req, "session-updated", updatedLiveSession);
-
-      return res.status(200).json(updatedLiveSession);
+    if (!existingLiveSession) {
+      return res.status(404).json({ error: "live session not found" });
     }
-  );
+
+    if (existingLiveSession.leaderUserId !== req.user.id) {
+      return res.status(403).json({
+        message: "Only the session leader can update this live session",
+      });
+    }
+
+    const updatedLiveSession = await db.LiveSession.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          ...req.body,
+          leaderUserId: existingLiveSession.leaderUserId,
+          slideshowId: existingLiveSession.slideshowId,
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    emitSessionUpdate(req, "session-updated", updatedLiveSession);
+
+    return res.status(200).json(updatedLiveSession);
+  } catch (err) {
+    return res.status(400).json({ message: err.message, code: err.code });
+  }
 };
 
 const show = (req, res) => {
@@ -73,21 +105,33 @@ const showBySessionId = (req, res) => {
   );
 };
 
-const destroy = (req, res) => {
-  db.LiveSession.findByIdAndDelete(req.params.id, (err, deletedLiveSession) => {
-    if (!deletedLiveSession)
+const destroy = async (req, res) => {
+  try {
+    const existingLiveSession = await db.LiveSession.findById(req.params.id);
+
+    if (!existingLiveSession) {
       return res.status(400).json({ error: "live session not found" });
-    if (err) return res.status(400).json({ err });
+    }
+
+    if (existingLiveSession.leaderUserId !== req.user.id) {
+      return res.status(403).json({
+        message: "Only the session leader can delete this live session",
+      });
+    }
+
+    await db.LiveSession.findByIdAndDelete(req.params.id);
 
     emitSessionUpdate(req, "session-ended", {
-      ...deletedLiveSession.toObject(),
+      ...existingLiveSession.toObject(),
       isActive: false,
     });
 
     return res.status(200).json({
-      message: `Live session ${deletedLiveSession.sessionId} was successfully deleted`,
+      message: `Live session ${existingLiveSession.sessionId} was successfully deleted`,
     });
-  });
+  } catch (err) {
+    return res.status(400).json({ err });
+  }
 };
 
 const echo = (req, res) => {
