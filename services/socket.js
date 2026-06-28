@@ -3,6 +3,7 @@ const db = require("../models");
 
 const initializeSocket = (server) => {
   const io = new Server(server, {
+    path: process.env.SOCKET_IO_PATH || "/api/v1/socket.io",
     cors: {
       origin: "*",
       methods: ["GET", "POST", "PUT", "DELETE"],
