@@ -1,7 +1,9 @@
 const express = require("express");
+const http = require("http");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
+const { initializeSocket } = require("./services/socket");
 
 const PORT = process.env.PORT || 3001;
 
@@ -24,10 +26,20 @@ app.get("/api/v1/", (req, res) => {
 });
 
 const routes = require("./routes");
+const server = http.createServer(app);
+const io = initializeSocket(server);
+
+app.set("io", io);
+
+app.use("/api/v1/live-session", routes.liveSession);
 app.use("/api/v1/nasheed", routes.nasheed);
 app.use("/api/v1/slideshow", routes.slideshow);
 app.use("/api/v1/user", routes.user);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = { app, server, io };

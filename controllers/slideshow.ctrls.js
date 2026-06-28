@@ -13,29 +13,49 @@ const index = (req, res) => {
   });
 };
 
-const create = (req, res) => {
-  const slideshowToCreate = req.body;
+const create = async (req, res) => {
+  try {
+    const slideshowToCreate = {
+      ...req.body,
+      creatorId: req.user.id,
+    };
 
-  db.Slideshow.create(slideshowToCreate, (err, createdSlideshow) => {
-    if (err)
-      return res.status(404).json({ message: err.message, code: err.code });
-
+    const createdSlideshow = await db.Slideshow.create(slideshowToCreate);
     return res.status(200).json(createdSlideshow);
-  });
+  } catch (err) {
+    return res.status(404).json({ message: err.message, code: err.code });
+  }
 };
 
-const update = (req, res) => {
-  db.Slideshow.findByIdAndUpdate(
-    req.params.id,
-    { $set: req.body },
-    { new: true, runValidators: true },
-    (err, updatedSlideshow) => {
-      if (err)
-        return res.status(400).json({ message: err.message, code: err.code });
+const update = async (req, res) => {
+  try {
+    const existingSlideshow = await db.Slideshow.findById(req.params.id);
 
-      return res.status(200).json(updatedSlideshow);
+    if (!existingSlideshow) {
+      return res.status(404).json({ error: "slideshow not found" });
     }
-  );
+
+    if (existingSlideshow.creatorId !== req.user.id) {
+      return res.status(403).json({
+        message: "Only the slideshow owner can update this slideshow",
+      });
+    }
+
+    const updatedSlideshow = await db.Slideshow.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          ...req.body,
+          creatorId: existingSlideshow.creatorId,
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json(updatedSlideshow);
+  } catch (err) {
+    return res.status(400).json({ message: err.message, code: err.code });
+  }
 };
 
 const show = (req, res) => {
@@ -45,16 +65,28 @@ const show = (req, res) => {
   });
 };
 
-const destroy = (req, res) => {
-  db.Slideshow.findByIdAndDelete(req.params.id, (err, deletedSlideshow) => {
-    if (!deletedSlideshow)
+const destroy = async (req, res) => {
+  try {
+    const existingSlideshow = await db.Slideshow.findById(req.params.id);
+
+    if (!existingSlideshow) {
       return res.status(400).json({ error: "slideshow not found" });
-    if (err) return res.status(400).json({ err });
+    }
+
+    if (existingSlideshow.creatorId !== req.user.id) {
+      return res.status(403).json({
+        message: "Only the slideshow owner can delete this slideshow",
+      });
+    }
+
+    await db.Slideshow.findByIdAndDelete(req.params.id);
 
     return res.status(200).json({
-      message: `Slideshow ${deletedSlideshow.title} was successfully deleted`,
+      message: `Slideshow ${existingSlideshow.title} was successfully deleted`,
     });
-  });
+  } catch (err) {
+    return res.status(400).json({ err });
+  }
 };
 
 const echo = (req, res) => {
