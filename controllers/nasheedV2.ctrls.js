@@ -110,6 +110,13 @@ const show = (req, res) => {
   });
 };
 
+const showById = (req, res) => {
+  db.NasheedV2.findById(req.params.id, (error, foundNasheed) => {
+    if (error) return res.status(400).json({ error });
+    return res.status(200).json({ foundNasheed });
+  });
+};
+
 const destroy = (req, res) => {
   db.NasheedV2.findByIdAndDelete(req.params.id, (err, deletedNasheed) => {
     if (!deletedNasheed)
@@ -126,4 +133,4 @@ const echo = (req, res) => {
   return res.status(200).json(message);
 };
 
-module.exports = { index, seed, create, echo, show, update, destroy };
+module.exports = { index, seed, create, echo, show, showById, update, destroy };
