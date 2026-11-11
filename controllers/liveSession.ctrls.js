@@ -71,7 +71,7 @@ const update = async (req, res) => {
           slideshowId: existingLiveSession.slideshowId,
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     emitSessionUpdate(req, "session-updated", updatedLiveSession);
@@ -92,17 +92,31 @@ const show = (req, res) => {
   });
 };
 
-const showBySessionId = (req, res) => {
-  db.LiveSession.findOne(
-    { sessionId: req.params.sessionId },
-    (error, foundLiveSession) => {
-      if (error) return res.status(400).json({ error });
-      if (!foundLiveSession)
-        return res.status(404).json({ error: "live session not found" });
+const showBySessionId = async (req, res) => {
+  try {
+    const sessionId = req.params.sessionId.trim();
 
-      return res.status(200).json({ foundLiveSession });
+    const escapedSessionId = sessionId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const foundLiveSession = await db.LiveSession.findOne({
+      sessionId: {
+        $regex: `^${escapedSessionId}$`,
+        $options: "i",
+      },
+    });
+
+    if (!foundLiveSession) {
+      return res.status(404).json({
+        error: "live session not found",
+      });
     }
-  );
+
+    return res.status(200).json({ foundLiveSession });
+  } catch (error) {
+    return res.status(400).json({
+      error: error.message,
+    });
+  }
 };
 
 const destroy = async (req, res) => {

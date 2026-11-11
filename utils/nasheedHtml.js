@@ -1,3 +1,5 @@
+const { sanitizeArabic } = require("./sanitizeArabic");
+
 function sanitizeFilename(name) {
   return (name || "nasheed").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120);
 }
@@ -182,7 +184,7 @@ function generateHTML(nasheed) {
 
               <p class="arabic" dir="rtl">
 
-                ${escapeHTML(line.arab)}
+                ${escapeHTML(sanitizeArabic(line.arab))}
 
               </p>
 
