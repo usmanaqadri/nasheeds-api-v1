@@ -14,6 +14,7 @@ router.get("/", ctrls.nasheedV2.index);
 router.get("/seed", ctrls.nasheedV2.seed);
 router.post("/create", protect, ctrls.nasheedV2.create);
 router.post("/echoMessage", ctrls.nasheedV2.echo);
+router.get("/id/:id", ctrls.nasheedV2.showById);
 router.get("/:slug", ctrls.nasheedV2.show);
 router.put("/:id", protect, ctrls.nasheedV2.update);
 router.delete("/:id", protect, ctrls.nasheedV2.destroy);
