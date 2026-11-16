@@ -32,7 +32,6 @@ const io = initializeSocket(server);
 app.set("io", io);
 
 app.use("/api/v1/live-session", routes.liveSession);
-app.use("/api/v1/nasheed", routes.nasheed);
 app.use("/api/v1/nasheedV2", routes.nasheedV2);
 app.use("/api/v1/slideshow", routes.slideshow);
 app.use("/api/v1/user", routes.user);

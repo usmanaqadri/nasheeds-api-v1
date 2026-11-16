@@ -25,7 +25,7 @@ const css = `
   .block { margin:0 0 24px; }
   .line { break-inside:avoid;text-align:center;margin:0 0 16px; }
   .arab { font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic',serif;font-size:23px;line-height:2.4;margin-bottom:6px; }
-  .rom,.eng { font-size:18px;line-height:1.5;margin:4px 0; }
+  .rom,.eng { font-family: "Cormorant", "Noto Serif", serif; font-size:18px;line-height:1.5;margin:4px 0; }
   .footnotes { break-before:page; }
   .footnote { font-size:15px;margin:0 0 12px;line-height:1.5; }
   sup a,.footnote a { color:inherit;text-decoration:none; }
