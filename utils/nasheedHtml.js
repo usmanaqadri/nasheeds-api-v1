@@ -278,7 +278,7 @@ function generateHTML(nasheed) {
 
         <link
 
-          href="https\://fonts.googleapis.com/css2?family=Cormorant:wght\@300;400;500&family=Noto+Nastaliq+Urdu&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap"
 
           rel="stylesheet"
 
@@ -308,7 +308,7 @@ function generateHTML(nasheed) {
 
           body {
 
-            font-family: "Cormorant", serif;
+            font-family: "Cormorant", "Noto Serif", serif;
 
             color: #222;
 
@@ -328,7 +328,7 @@ function generateHTML(nasheed) {
 
           .arabic-title {
 
-            font-family: "Noto Nastaliq Urdu", serif;
+            font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", serif;
 
             font-size: 30px;
 
@@ -378,7 +378,7 @@ function generateHTML(nasheed) {
 
           .arabic {
 
-            font-family: "Noto Nastaliq Urdu", serif;
+            font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", serif;
 
             font-size: 24px;
 
@@ -400,6 +400,8 @@ function generateHTML(nasheed) {
 
           .transliteration {
 
+            font-family: "Noto Serif", serif;
+            
             font-size: 20px;
 
             line-height: 1.4;
@@ -412,6 +414,8 @@ function generateHTML(nasheed) {
 
           .english {
 
+            font-family: "Cormorant", "Noto Serif", serif;
+          
             font-size: 20px;
 
             line-height: 1.4;
