@@ -28,7 +28,7 @@ const css = `
   .rom,.eng { font-family: "Cormorant", "Noto Serif", serif; font-size:18px;line-height:1.5;margin:4px 0; }
   .footnotes { break-before:page; }
   .footnote { font-size:15px;margin:0 0 12px;line-height:1.5; }
-  sup a,.footnote a { color:inherit;text-decoration:none; }
+  sup a,.footnote a { color: #5B7FA3;text-decoration:none; }
 `;
 const wrap = (body) =>
   `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${body}</body></html>`;

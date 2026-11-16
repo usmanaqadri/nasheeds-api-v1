@@ -15,6 +15,9 @@ async function renderPDF(html, { tocParts } = {}) {
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    ...(process.env.CHROME_PATH
+      ? { executablePath: process.env.CHROME_PATH }
+      : {}),
   });
   try {
     const page = await browser.newPage();
@@ -27,7 +30,11 @@ async function renderPDF(html, { tocParts } = {}) {
       footerTemplate: `<div style="width:100%;font:14px Arial,sans-serif;color:#555;text-align:right;padding-right:18mm"><span class="pageNumber"></span></div>`,
     };
     const load = async (markup) => {
-      await page.setContent(markup, { waitUntil: "networkidle0" });
+      await page.setContent(markup, {
+        waitUntil: "domcontentloaded",
+        timeout: 30000,
+      });
+
       await page.evaluate(() => document.fonts.ready);
     };
     if (tocParts) {
