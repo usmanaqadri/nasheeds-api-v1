@@ -25,14 +25,39 @@ const css = `
   .block { margin:0 0 24px; }
   .line { break-inside:avoid;text-align:center;margin:0 0 16px; }
   .arab { font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic',serif;font-size:23px;line-height:2.4;margin-bottom:6px; }
-  .rom,.eng { font-family: "Cormorant", "Noto Serif", serif; font-size:18px;line-height:1.5;margin:4px 0; }
+  .rom {
+    font-family: "Noto Serif", serif;
+    font-size: 18px;
+    line-height: 1.5;
+    margin: 4px 0;
+  }
+
+  .eng {
+    font-family: "Cormorant", "Noto Serif", serif;
+    font-size: 18px;
+    line-height: 1.5;
+    margin: 4px 0;
+  }
   .footnotes { break-before:page; }
   .footnote { font-size:15px;margin:0 0 12px;line-height:1.5; }
   sup a,.footnote a { color: #5B7FA3;text-decoration:none; }
 `;
-const wrap = (body) =>
-  `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${body}</body></html>`;
+const wrap = (body) => `
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8">
 
+      <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap"
+        rel="stylesheet"
+      >
+
+      <style>${css}</style>
+    </head>
+    <body>${body}</body>
+  </html>
+`;
 function makeParts(slideshow, arranger) {
   const footnotes = [];
   let footnoteNo = 0;
