@@ -237,8 +237,8 @@ function generateHTML(nasheed) {
 
         ${footnoteRefs
 
-          .map(
-            (fn) => `
+      .map(
+        (fn) => `
 
               <div class="footnote" id="footnote-${fn.number}">
 
@@ -253,9 +253,9 @@ function generateHTML(nasheed) {
               </div>
 
             `,
-          )
+      )
 
-          .join("\n")}
+      .join("\n")}
 
       </section>
 
@@ -430,7 +430,7 @@ function generateHTML(nasheed) {
 
             text-decoration: none;
 
-            color: #3178c6;
+            color: #5B7FA3;
 
           }
 
@@ -469,7 +469,7 @@ function generateHTML(nasheed) {
 
 
           .footnote {
-
+          
             font-size: 17px;
 
             line-height: 1.5;
@@ -479,7 +479,7 @@ function generateHTML(nasheed) {
             break-inside: avoid;
 
           }
-
+            
 
 
           .footnote sup {
