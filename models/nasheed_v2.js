@@ -1,12 +1,42 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
+
+// Custom formatting for specific ranges of text within a line
+const formattingRangeSchema = new mongoose.Schema(
+  {
+    start: { type: Number, required: true },
+    end: { type: Number, required: true },
+    styles: {
+      bold: { type: Boolean, default: false },
+      italic: { type: Boolean, default: false },
+      underline: { type: Boolean, default: false },
+      fontSize: { type: Number, default: 1 },
+    },
+  },
+  { _id: false }
+);
+
 // A single line of lyrics
 const lineSchema = new Schema({
   arab: { type: String, required: true },
   rom: { type: String, default: "" },
   eng: { type: String, default: "" },
   language: { type: String, default: "ar" },
+  formatting: {
+    arab: {
+      type: [formattingRangeSchema],
+      default: [],
+    },
+    rom: {
+      type: [formattingRangeSchema],
+      default: [],
+    },
+    eng: {
+      type: [formattingRangeSchema],
+      default: [],
+    },
+  },
 });
 
 // A stanza contains one or more lines
