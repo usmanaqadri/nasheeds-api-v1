@@ -7,6 +7,11 @@ const esc = (value) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+const isUrdu = (language) =>
+  (Array.isArray(language) ? language : [language]).includes("ur");
+const scriptClass = (language) => isUrdu(language) ? " urdu" : "";
+const scriptLang = (language) => isUrdu(language) ? "ur" : "ar";
+
 const css = `
   @page { size:A4; margin:20mm 18mm 22mm; }
   * { box-sizing:border-box; }
@@ -21,10 +26,11 @@ const css = `
   .toc-page { min-width:2em;text-align:right;font-variant-numeric:tabular-nums; }
   .item { break-before:page; }
   .item h1 { font-size:27px;text-align:center;font-weight:500;margin:0 0 28px; }
-  .arab-title { font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic',serif;font-size:25px;font-weight:400;text-align:center;line-height:2.3;margin:0 0 12px; }
+  .arab-title { font-family:'Amiri',serif;font-size:25px;font-weight:400;text-align:center;line-height:2.3;margin:0 0 12px; }
+  .arab-title.urdu, .arab.urdu { font-family:'Noto Nastaliq Urdu',serif; }
   .block { margin:0 0 24px; }
   .line { break-inside:avoid;text-align:center;margin:0 0 16px; }
-  .arab { font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic',serif;font-size:23px;line-height:2.4;margin-bottom:6px; }
+  .arab { font-family:'Amiri',serif;font-size:23px;line-height:2.4;margin-bottom:6px; }
   .rom {
     font-family: "Noto Serif", serif;
     font-size: 18px;
@@ -49,7 +55,7 @@ const wrap = (body) => `
       <meta charset="utf-8">
 
       <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400;500&family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap"
         rel="stylesheet"
       >
 
@@ -111,7 +117,7 @@ function makeParts(slideshow, arranger) {
                 (slide.layout || "arab-rom-eng").split("-"),
               );
               return `<div class="line" id="${anchor}">
-        ${visible.has("arab") && line.arab ? `<div class="arab" dir="rtl">${esc(sanitizeArabic(line.arab))}</div>` : ""}
+        ${visible.has("arab") && line.arab ? `<div class="arab${scriptClass(line.language)}" lang="${scriptLang(line.language)}" dir="rtl">${esc(sanitizeArabic(line.arab))}</div>` : ""}
         ${visible.has("rom") && line.rom ? `<div class="rom">${esc(line.rom)}</div>` : ""}
         ${visible.has("eng") && line.eng ? `<div class="eng">${english}</div>` : ""}
       </div>`;
@@ -120,7 +126,7 @@ function makeParts(slideshow, arranger) {
       )
       .join("");
     return `<section class="item" id="item-${i + 1}">
-      ${slide.arabTitle ? `<h2 class="arab-title" dir="rtl">${esc(sanitizeArabic(slide.arabTitle))}</h2>` : ""}
+      ${slide.arabTitle ? `<h2 class="arab-title${scriptClass(slide.language)}" lang="${scriptLang(slide.language)}" dir="rtl">${esc(sanitizeArabic(slide.arabTitle))}</h2>` : ""}
       <h1>${esc(slide.title)}</h1>${blocks}</section>`;
   });
   // Footnotes are appended after all slideshow items; each superscript and

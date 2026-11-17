@@ -97,6 +97,7 @@ async function resolveSlideshow(slideshow, NasheedV2) {
       type: "nasheed",
       title: nasheed.engTitle || slide.engTitle || "Untitled nasheed",
       arabTitle: nasheed.arabTitle || "",
+      language: nasheed.language || ["ar"],
       layout: slide.layout || "arab-rom-eng",
       blocks: (slide.blocks || []).map((block) => ({
         type: block.type,
