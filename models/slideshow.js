@@ -1,5 +1,24 @@
 const mongoose = require("mongoose");
 
+const formattingRangeSchema = new mongoose.Schema(
+  {
+    start: { type: Number, required: true, min: 0 },
+    end: { type: Number, required: true, min: 1 },
+    styles: {
+      bold: { type: Boolean, default: false },
+      italic: { type: Boolean, default: false },
+      underline: { type: Boolean, default: false },
+      fontSize: {
+        type: Number,
+        default: 1,
+        min: 0.5,
+        max: 3,
+      },
+    },
+  },
+  { _id: false },
+);
+
 const slideBlockSchema = new mongoose.Schema({
   type: { type: String, required: true, enum: ["stanza", "refrain"] },
   stanzaId: {
@@ -28,6 +47,27 @@ const customLineSchema = new mongoose.Schema(
     arab: { type: String, default: "" },
     rom: { type: String, default: "" },
     eng: { type: String, default: "" },
+
+    language: {
+      type: String,
+      enum: ["ar", "ur"],
+      default: "ar",
+    },
+
+    formatting: {
+      arab: {
+        type: [formattingRangeSchema],
+        default: [],
+      },
+      rom: {
+        type: [formattingRangeSchema],
+        default: [],
+      },
+      eng: {
+        type: [formattingRangeSchema],
+        default: [],
+      },
+    },
   },
   { _id: true },
 );

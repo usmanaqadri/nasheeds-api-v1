@@ -1,4 +1,5 @@
 const { sanitizeArabic } = require("./sanitizeArabic");
+const { renderFormattedText } = require("./formattedText");
 
 const esc = (value) =>
   String(value ?? "")
@@ -82,43 +83,65 @@ function makeParts(slideshow, arranger) {
             .map((line, li) => {
               const lineId = String(line._id || "");
               const anchor = `line-${i}-${bi}-${li}`;
-              let english = esc(line.eng || "");
-              // Like the existing nasheed template, only annotate the first occurrence
-              // of a repeated line in each nasheed.
+
+              const source = String(line.eng || "");
+              const markers = [];
+
+              // Only annotate the first occurrence of a repeated line
+              // within each slideshow item.
               const seenKey = `${i}:${lineId}`;
+
               if (lineId && !seen.has(seenKey)) {
                 seen.add(seenKey);
+
                 const notes = [...(footnotesByLine.get(lineId) || [])].sort(
-                  (a, b) => (a.range?.[0] || 0) - (b.range?.[0] || 0),
+                  (a, b) => (a.range?.[0] || 0) - (b.range?.[0] || 0)
                 );
-                const source = String(line.eng || "");
-                let pos = 0,
-                  out = "";
+
+                let pos = 0;
+
                 for (const note of notes) {
                   const [start, end] = note.range || [];
+
                   if (
                     !Number.isInteger(start) ||
                     !Number.isInteger(end) ||
                     start < pos ||
                     end <= start ||
                     end > source.length
-                  )
+                  ) {
                     continue;
+                  }
+
                   const n = ++footnoteNo;
-                  out +=
-                    esc(source.slice(pos, end)) +
-                    `<sup><a href="#fn-${n}">${n}</a></sup>`;
-                  footnotes.push({ number: n, anchor, content: note.content });
+
+                  markers.push({
+                    offset: end,
+                    html: `<sup><a href="#fn-${n}">${n}</a></sup>`,
+                  });
+
+                  footnotes.push({
+                    number: n,
+                    anchor,
+                    content: note.content,
+                  });
+
                   pos = end;
                 }
-                english = out + esc(source.slice(pos));
               }
+
+              const english = renderFormattedText(
+                source,
+                line.formatting?.eng || [],
+                markers
+              );
+
               const visible = new Set(
                 (slide.layout || "arab-rom-eng").split("-"),
               );
               return `<div class="line" id="${anchor}">
-        ${visible.has("arab") && line.arab ? `<div class="arab${scriptClass(line.language)}" lang="${scriptLang(line.language)}" dir="rtl">${esc(sanitizeArabic(line.arab))}</div>` : ""}
-        ${visible.has("rom") && line.rom ? `<div class="rom">${esc(line.rom)}</div>` : ""}
+        ${visible.has("arab") && line.arab ? `<div class="arab${scriptClass(line.language)}" lang="${scriptLang(line.language)}" dir="rtl">${renderFormattedText(line.arab, line.formatting?.arab || [])}</div>` : ""}
+        ${visible.has("rom") && line.rom ? `<div class="rom">${renderFormattedText(line.rom, line.formatting?.rom || [])}</div>` : ""}
         ${visible.has("eng") && line.eng ? `<div class="eng">${english}</div>` : ""}
       </div>`;
             })
