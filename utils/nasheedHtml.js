@@ -99,9 +99,15 @@ function renderEnglishWithFootnotes(text, notes, counter, refs, anchorId) {
   return html;
 }
 
+const isUrdu = (language) =>
+  (Array.isArray(language) ? language : [language]).includes("ur");
+const scriptClass = (language) => isUrdu(language) ? " urdu" : "";
+const scriptLang = (language) => isUrdu(language) ? "ur" : "ar";
+
 function generateHTML(nasheed) {
   const {
     arabTitle = "",
+    language = ["ar"],
 
     engTitle = "",
 
@@ -182,7 +188,7 @@ function generateHTML(nasheed) {
 
             <div class="verse-block" id="${anchorId}">
 
-              <p class="arabic" dir="rtl">
+              <p class="arabic${scriptClass(line.language)}" lang="${scriptLang(line.language)}" dir="rtl">
 
                 ${escapeHTML(sanitizeArabic(line.arab))}
 
@@ -278,7 +284,7 @@ function generateHTML(nasheed) {
 
         <link
 
-          href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400;500&family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap"
 
           rel="stylesheet"
 
@@ -287,6 +293,7 @@ function generateHTML(nasheed) {
 
 
         <style>
+          .arabic-title.urdu, .arabic.urdu { font-family: "Noto Nastaliq Urdu", serif; }
 
           @page {
 
@@ -328,15 +335,17 @@ function generateHTML(nasheed) {
 
           .arabic-title {
 
-            font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", serif;
+            font-family: "Amiri", serif;
 
-            font-size: 30px;
+            font-size: 25px;
+
+            font-weight: 400;
 
             direction: rtl;
 
-            line-height: 2.2;
+            line-height: 2.3;
 
-            margin: 0 0 4px;
+            margin: 0 0 12px;
 
           }
 
@@ -378,9 +387,11 @@ function generateHTML(nasheed) {
 
           .arabic {
 
-            font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", serif;
+            font-family: "Amiri", serif;
 
-            font-size: 24px;
+            font-size: 23px;
+
+            font-weight: 400;
 
             direction: rtl;
 
@@ -506,7 +517,7 @@ function generateHTML(nasheed) {
 
       <body>
 
-        <h1 class="arabic-title">
+        <h1 class="arabic-title${scriptClass(language)}" lang="${scriptLang(language)}" dir="rtl">
 
           ${escapeHTML(arabTitle)}
 
