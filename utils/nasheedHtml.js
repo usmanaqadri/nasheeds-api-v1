@@ -1,4 +1,5 @@
 const { sanitizeArabic } = require("./sanitizeArabic");
+const { renderFormattedText } = require("./formattedText");
 
 function sanitizeFilename(name) {
   return (name || "nasheed").replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120);
@@ -51,19 +52,24 @@ function resolveSequenceItem(item, stanzaById, refrainById) {
 
 // ORIGINAL, unmodified English translation.
 
-function renderEnglishWithFootnotes(text, notes, counter, refs, anchorId) {
+function renderEnglishWithFootnotes(
+  text,
+  notes,
+  counter,
+  refs,
+  anchorId,
+  formatting = []
+) {
   const original = String(text || "");
+  const sorted = [...notes].sort(
+    (a, b) => (a.range?.[0] || 0) - (b.range?.[0] || 0)
+  );
 
-  const sorted = [...notes].sort((a, b) => a.range[0] - b.range[0]);
-
-  let html = "";
-
+  const markers = [];
   let cursor = 0;
 
   for (const note of sorted) {
     const [start, end] = note.range || [];
-
-    // V2 ranges use [start, end), with end exclusive.
 
     if (
       !Number.isInteger(start) ||
@@ -75,29 +81,25 @@ function renderEnglishWithFootnotes(text, notes, counter, refs, anchorId) {
       continue;
     }
 
-    html += escapeHTML(original.slice(cursor, start));
-
-    html += escapeHTML(original.slice(start, end));
-
     const number = counter.value++;
 
-    html += `<sup><a href="#footnote-${number}">${number}</a></sup>`;
+    markers.push({
+      offset: end,
+      html: `<sup><a href="#footnote-${number}">${number}</a></sup>`,
+    });
 
     refs.push({
       number,
-
       content: note.content,
-
       anchorId,
     });
 
     cursor = end;
   }
 
-  html += escapeHTML(original.slice(cursor));
-
-  return html;
+  return renderFormattedText(original, formatting, markers);
 }
+
 
 const isUrdu = (language) =>
   (Array.isArray(language) ? language : [language]).includes("ur");
@@ -182,6 +184,8 @@ function generateHTML(nasheed) {
             footnoteRefs,
 
             anchorId,
+
+            line.formatting?.eng || []
           );
 
           return `
@@ -190,7 +194,7 @@ function generateHTML(nasheed) {
 
               <p class="arabic${scriptClass(line.language)}" lang="${scriptLang(line.language)}" dir="rtl">
 
-                ${escapeHTML(sanitizeArabic(line.arab))}
+                ${renderFormattedText(line.arab, line.formatting?.arab || [])}
 
               </p>
 
@@ -198,7 +202,7 @@ function generateHTML(nasheed) {
 
               <p class="transliteration">
 
-                <em>${escapeHTML(line.rom)}</em>
+                <em>${renderFormattedText(line.rom, line.formatting?.rom || [])}</em>
 
               </p>
 
