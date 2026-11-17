@@ -6,6 +6,7 @@ const lineSchema = new Schema({
   arab: { type: String, required: true },
   rom: { type: String, default: "" },
   eng: { type: String, default: "" },
+  language: { type: String, default: "ar" },
 });
 
 // A stanza contains one or more lines
@@ -163,9 +164,10 @@ const nasheedV2Schema = new Schema(
     },
 
     language: {
-      type: String,
-      trim: true,
-      default: "ar",
+      type: [{
+        type: String,
+      }],
+      default: ["ar"],
     },
 
     performers: {
